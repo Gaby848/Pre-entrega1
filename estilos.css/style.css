@@ -1,0 +1,22 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+label, input, select, button {
+  display: block;
+  margin: 8px 0;
+}
+
+.oculto {
+  display: none;
+}
+
+#historial li {
+  border-bottom: 1px solid #ccc;
+  padding: 4px 0;
+}
+
+.title{
+    color: darkblue;
+}

@@ -1,56 +1,69 @@
 const operaciones = ["sumar", "restar", "multiplicar", "dividir"];
-let continuar = true;
+let historial = JSON.parse(localStorage.getItem("historial")) || [];
 
 function calcular(operacion, num1, num2) {
-  switch (operacion) {
-    case "sumar":
-      return num1 + num2;
-    case "restar":
-      return num1 - num2;
-    case "multiplicar":
-      return num1 * num2;
-    case "dividir":
-        return num1 / num2;
-      default:
-        return null;
-     }
+  const operacionesObj = {
+    sumar: (a, b) => a + b,
+    restar: (a, b) => a - b,
+    multiplicar: (a, b) => a * b,
+    dividir: (a, b) => b === 0 ? null : a / b
+  };
+  return operacionesObj[operacion](num1, num2);
+}
+
+function guardarHistorial(obj) {
+  historial.push(obj);
+  localStorage.setItem("historial", JSON.stringify(historial));
+}
+
+function mostrarHistorial() {
+  const lista = document.getElementById("historial");
+  lista.innerHTML = "";
+  historial.forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = `${item.operacion} ${item.num1} y ${item.num2} = ${item.resultado}`;
+    lista.appendChild(li);
+  });
+}
+
+function filtrarResultados(mayorA) {
+  return historial.filter(item => item.resultado > mayorA);
+}
+
+function obtenerOperacionesUnicas() {
+  return [...new Set(historial.map(item => item.operacion))];
+}
+
+document.getElementById("btn-nombre").addEventListener("click", () => {
+  const nombre = document.getElementById("nombre").value.trim();
+  if (nombre) {
+    localStorage.setItem("usuario", nombre);
+    document.getElementById("mensaje").textContent = `Hola ${nombre}, bienvenido a la calculadora.`;
+    document.getElementById("bienvenida").classList.add("oculto");
+    document.getElementById("calculadora").classList.remove("oculto");
+    mostrarHistorial();
   }
+});
 
-function iniciarCalculadora() {
-  alert("Bienvenido a la calculadora.");
+document.getElementById("btn-calcular").addEventListener("click", () => {
+  const operacion = document.getElementById("operacion").value;
+  const num1 = parseFloat(document.getElementById("num1").value);
+  const num2 = parseFloat(document.getElementById("num2").value);
 
-  while (continuar) {
-    console.log("Operaciones disponibles:", operaciones.join(", "));
+  if (!isNaN(num1) && !isNaN(num2)) {
+    const resultado = calcular(operacion, num1, num2);
+    const resultadoElem = document.getElementById("resultado");
 
-    let operacion = prompt("¿Qué operación desea realizar? (sumar, restar, multiplicar, dividir)").toLowerCase();
-
-    if (operaciones.includes(operacion)) {
-      let num1 = parseFloat(prompt("Ingrese el primer número:"));
-      let num2 = parseFloat(prompt("Ingrese el segundo número:"));
-
-      let resultado = calcular(operacion, num1, num2);
-
-      if (resultado !== null) {
-        alert(`El resultado de ${operacion} ${num1} y ${num2} es: ${resultado}`);
-        console.log(`Resultado: ${resultado}`);
-      }
-    } else {
-      alert("Operación inválida. Intente nuevamente.");
+    if (resultado === null) {
+      resultadoElem.textContent = "Error: No se puede dividir por cero.";
+      return;
     }
 
-    continuar = confirm("¿Desea realizar otra operación?");
+    resultadoElem.textContent = `Resultado: ${resultado}`;
+
+    guardarHistorial({ operacion, num1, num2, resultado });
+    mostrarHistorial();
+  } else {
+    document.getElementById("resultado").textContent = "Por favor ingresa números válidos.";
   }
-
-  alert("Gracias por utilizar mi calculadora.");
-}
- function ejecutarCalculadora() {
-  let repetir = true;
-
-  while (repetir) {
-    iniciarCalculadora();
-    repetir = confirm("¿queres volver a la calculadora?");
-  }
-  alert("nos vemos!!");
-}
-
-ejecutarCalculadora();
+});
