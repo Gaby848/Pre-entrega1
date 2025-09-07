@@ -1,69 +1,124 @@
-const operaciones = ["sumar", "restar", "multiplicar", "dividir"];
-let historial = JSON.parse(localStorage.getItem("historial")) || [];
 
-function calcular(operacion, num1, num2) {
-  const operacionesObj = {
-    sumar: (a, b) => a + b,
-    restar: (a, b) => a - b,
-    multiplicar: (a, b) => a * b,
-    dividir: (a, b) => b === 0 ? null : a / b
-  };
-  return operacionesObj[operacion](num1, num2);
+let expresion = "";
+const pantalla = document.getElementById("pantalla");
+
+function actualizarPantalla() {
+  pantalla.textContent = expresion || "0";
 }
 
-function guardarHistorial(obj) {
-  historial.push(obj);
-  localStorage.setItem("historial", JSON.stringify(historial));
-}
-
-function mostrarHistorial() {
-  const lista = document.getElementById("historial");
-  lista.innerHTML = "";
-  historial.forEach((item) => {
-    const li = document.createElement("li");
-    li.textContent = `${item.operacion} ${item.num1} y ${item.num2} = ${item.resultado}`;
-    lista.appendChild(li);
+function toast(mensaje, color = "#4caf50") {
+  iziToast.show({
+    message: mensaje,
+    backgroundColor: color,
+    position: "topRight",
+    timeout: 2000
   });
 }
 
-function filtrarResultados(mayorA) {
-  return historial.filter(item => item.resultado > mayorA);
-}
+document.addEventListener("DOMContentLoaded", () => {
 
-function obtenerOperacionesUnicas() {
-  return [...new Set(historial.map(item => item.operacion))];
-}
+  const inputNombre = document.getElementById("nombre");
+  const btnNombre = document.getElementById("btn-nombre");
 
-document.getElementById("btn-nombre").addEventListener("click", () => {
-  const nombre = document.getElementById("nombre").value.trim();
-  if (nombre) {
-    localStorage.setItem("usuario", nombre);
-    document.getElementById("mensaje").textContent = `Hola ${nombre}, bienvenido a la calculadora.`;
-    document.getElementById("bienvenida").classList.add("oculto");
-    document.getElementById("calculadora").classList.remove("oculto");
-    mostrarHistorial();
-  }
-});
+  inputNombre.focus();
 
-document.getElementById("btn-calcular").addEventListener("click", () => {
-  const operacion = document.getElementById("operacion").value;
-  const num1 = parseFloat(document.getElementById("num1").value);
-  const num2 = parseFloat(document.getElementById("num2").value);
+  inputNombre.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const nombre = inputNombre.value.trim();
+      if (nombre) {
+        btnNombre.click();
+      } else {
+        toast("Por favor ingresa tu nombre", "#ff9800");
+      }
+    }
+  });
 
-  if (!isNaN(num1) && !isNaN(num2)) {
-    const resultado = calcular(operacion, num1, num2);
-    const resultadoElem = document.getElementById("resultado");
-
-    if (resultado === null) {
-      resultadoElem.textContent = "Error: No se puede dividir por cero.";
+  btnNombre.addEventListener("click", () => {
+    const nombre = inputNombre.value.trim();
+    if (!nombre) {
+      toast("Por favor ingresa tu nombre", "#ff9800");
       return;
     }
 
-    resultadoElem.textContent = `Resultado: ${resultado}`;
+    localStorage.setItem("usuario", nombre);
+    Swal.fire({
+      title: `¡Bienvenido ${nombre}! 🎉`,
+      text: "Prepárate para usar la calculadora interactiva",
+      icon: "success",
+      confirmButtonText: "Comenzar"
+    }).then(() => {
+      document.getElementById("bienvenida").classList.add("oculto");
+      document.getElementById("calculadora").classList.remove("oculto");
+      toast(`Hola ${nombre}, disfruta tu calculadora 😎`);
+      mostrarHistorial();
+    });
+  });
 
-    guardarHistorial({ operacion, num1, num2, resultado });
-    mostrarHistorial();
-  } else {
-    document.getElementById("resultado").textContent = "Por favor ingresa números válidos.";
-  }
+  document.querySelectorAll(".calculadora-grid button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const valor = btn.textContent;
+
+      if (!isNaN(valor)) {
+        expresion += valor;
+      } else if (["+", "-", "*", "/"].includes(valor)) {
+        expresion += ` ${valor} `;
+      } else if (valor === "C") {
+        expresion = "";
+        toast("Pantalla borrada 🧹", "#ff9800");
+      } else if (valor === "=") {
+        try {
+          const resultado = eval(expresion);
+          if (isNaN(resultado) || resultado === Infinity) {
+            expresion = "";
+            Swal.fire("Error", "Operación inválida ❌", "error");
+          } else {
+            guardarHistorial({ operacion: expresion, resultado });
+            mostrarHistorial();
+            expresion = resultado.toString();
+            toast(`Resultado: ${resultado}`, "#4caf50");
+          }
+        } catch {
+          expresion = "";
+          Swal.fire("Error", "Expresión inválida ❌", "error");
+        }
+      }
+      actualizarPantalla();
+    });
+  });
+
+  document.getElementById("limpiar-historial").addEventListener("click", () => {
+    Swal.fire({
+      title: "¿Borrar historial?",
+      text: "Esta acción no se puede deshacer",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, borrar"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        limpiarHistorial();
+        mostrarHistorial();
+        toast("Historial eliminado 🗑️", "#e91e63");
+      }
+    });
+  });
+
+  document.addEventListener("keydown", (e) => {
+    const calcVisible = !document.getElementById("calculadora").classList.contains("oculto");
+    if (!calcVisible) return;
+
+    if (!isNaN(e.key)) {
+      expresion += e.key;
+    } else if (["+", "-", "*", "/"].includes(e.key)) {
+      expresion += ` ${e.key} `;
+    } else if (e.key === "Enter") {
+      document.querySelector(".btn-equal").click();
+    } else if (e.key === "Backspace") {
+      expresion = expresion.slice(0, -1);
+    }
+    actualizarPantalla();
+  });
+
 });

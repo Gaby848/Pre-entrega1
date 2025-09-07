@@ -1,0 +1,6 @@
+[
+  { "id": "sumar", "nombre": "Sumar" },
+  { "id": "restar", "nombre": "Restar" },
+  { "id": "multiplicar", "nombre": "Multiplicar" },
+  { "id": "dividir", "nombre": "Dividir" }
+]
