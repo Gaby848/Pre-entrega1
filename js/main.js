@@ -1,124 +1,83 @@
+let productos = {};
+let tipoCambio = 0;
+let chart = null;
 
-let expresion = "";
-const pantalla = document.getElementById("pantalla");
-
-function actualizarPantalla() {
-  pantalla.textContent = expresion || "0";
+function showError(title, text) {
+  if (typeof Swal !== "undefined") Swal.fire({ title, text, icon:"error", confirmButtonText:"Corregir" });
+  else alert(title + "\n" + text);
 }
 
-function toast(mensaje, color = "#4caf50") {
-  iziToast.show({
-    message: mensaje,
-    backgroundColor: color,
-    position: "topRight",
-    timeout: 2000
+function showSuccess(title, html) {
+  if (typeof Swal !== "undefined") Swal.fire({
+    title, html, icon:"success", confirmButtonText:"Aceptar",
+    background:"#f4faff", color:"#004080",
+    showClass:{ popup:'animate__animated animate__fadeInDown' },
+    hideClass:{ popup:'animate__animated animate__fadeOutUp' }
   });
+  else alert(title + "\n" + (html ? html.replace(/<[^>]+>/g,'') : ''));
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+async function cargarDatos() {
+  try {
+    const res = await fetch("data/operaciones.json");
+    if (!res.ok) throw new Error("Fetch falló: " + res.status);
+    const data = await res.json();
+    productos = data.productos || {};
+    tipoCambio = data.tipoCambio || 1;
 
-  const inputNombre = document.getElementById("nombre");
-  const btnNombre = document.getElementById("btn-nombre");
-
-  inputNombre.focus();
-
-  inputNombre.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const nombre = inputNombre.value.trim();
-      if (nombre) {
-        btnNombre.click();
-      } else {
-        toast("Por favor ingresa tu nombre", "#ff9800");
-      }
-    }
-  });
-
-  btnNombre.addEventListener("click", () => {
-    const nombre = inputNombre.value.trim();
-    if (!nombre) {
-      toast("Por favor ingresa tu nombre", "#ff9800");
-      return;
-    }
-
-    localStorage.setItem("usuario", nombre);
-    Swal.fire({
-      title: `¡Bienvenido ${nombre}! 🎉`,
-      text: "Prepárate para usar la calculadora interactiva",
-      icon: "success",
-      confirmButtonText: "Comenzar"
-    }).then(() => {
-      document.getElementById("bienvenida").classList.add("oculto");
-      document.getElementById("calculadora").classList.remove("oculto");
-      toast(`Hola ${nombre}, disfruta tu calculadora 😎`);
-      mostrarHistorial();
+    const select = document.getElementById("producto");
+    select.innerHTML = '<option value="">-- Seleccionar --</option>';
+    Object.keys(productos).forEach(key => {
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = productos[key].nombre;
+      select.appendChild(opt);
     });
-  });
+  } catch(e) {
+    console.error(e);
+    showError("Error de carga", "No se pudo cargar operaciones.json");
+  }
+}
+cargarDatos();
 
-  document.querySelectorAll(".calculadora-grid button").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const valor = btn.textContent;
+const formCalc = document.getElementById("calc-form");
+if (formCalc) formCalc.addEventListener("submit", e=>{
+  e.preventDefault();
+  const data = {
+    producto: document.getElementById("producto").value,
+    monto: parseFloat(document.getElementById("monto").value),
+    plazo: parseInt(document.getElementById("plazo").value),
+    convertir: document.getElementById("convertir").checked
+  };
+  const validations = [
+    { condition: !data.producto, error:{ title:"Error", text:"Debe seleccionar un producto." } },
+    { condition: isNaN(data.monto)||data.monto<=0, error:{ title:"Error en monto", text:"Ingrese monto válido." } },
+    { condition: isNaN(data.plazo)||data.plazo<=0, error:{ title:"Error en plazo", text:"Ingrese plazo válido." } }
+  ];
+  for (let v of validations) if(v.condition){ showError(v.error.title,v.error.text); return; }
 
-      if (!isNaN(valor)) {
-        expresion += valor;
-      } else if (["+", "-", "*", "/"].includes(valor)) {
-        expresion += ` ${valor} `;
-      } else if (valor === "C") {
-        expresion = "";
-        toast("Pantalla borrada 🧹", "#ff9800");
-      } else if (valor === "=") {
-        try {
-          const resultado = eval(expresion);
-          if (isNaN(resultado) || resultado === Infinity) {
-            expresion = "";
-            Swal.fire("Error", "Operación inválida ❌", "error");
-          } else {
-            guardarHistorial({ operacion: expresion, resultado });
-            mostrarHistorial();
-            expresion = resultado.toString();
-            toast(`Resultado: ${resultado}`, "#4caf50");
-          }
-        } catch {
-          expresion = "";
-          Swal.fire("Error", "Expresión inválida ❌", "error");
-        }
-      }
-      actualizarPantalla();
+  if (!productos[data.producto]) { showError("Producto no disponible","Recarga la página."); return; }
+
+  const tasa = productos[data.producto].tasa/100;
+  const interes = data.monto*tasa*data.plazo/12;
+  const total = data.monto+interes;
+  let detalle = `<p><strong>Producto:</strong>${productos[data.producto].nombre}</p>
+  <p><strong>Monto:</strong> $${data.monto.toFixed(2)}</p>
+  <p><strong>Plazo:</strong> ${data.plazo} meses</p>
+  <p><strong>Interés:</strong> $${interes.toFixed(2)}</p>
+  <p><strong>Total:</strong> $${total.toFixed(2)}</p>`;
+  if(data.convertir){ detalle += `<p><strong>Total USD:</strong> $${(total/tipoCambio).toFixed(2)}</p>`; }
+  showSuccess("Resultado del cálculo",detalle);
+
+  const labels = Array.from({length:data.plazo},(_,i)=>`Mes ${i+1}`);
+  const valores = labels.map((_,i)=>data.monto + (data.monto*tasa*(i+1)/12));
+  const canvas = document.getElementById("graficoInteres");
+  if(canvas && typeof Chart!=="undefined"){
+    if(chart) chart.destroy();
+    chart = new Chart(canvas.getContext("2d"),{
+      type:"line",
+      data:{ labels, datasets:[{label:"Capital acumulado", data:valores, borderColor:"#004080", backgroundColor:"rgba(0,64,128,0.2)", tension:0.3, fill:true}] },
+      options:{ responsive:true, plugins:{ legend:{display:true} }, scales:{ y:{beginAtZero:false} } }
     });
-  });
-
-  document.getElementById("limpiar-historial").addEventListener("click", () => {
-    Swal.fire({
-      title: "¿Borrar historial?",
-      text: "Esta acción no se puede deshacer",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Sí, borrar"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        limpiarHistorial();
-        mostrarHistorial();
-        toast("Historial eliminado 🗑️", "#e91e63");
-      }
-    });
-  });
-
-  document.addEventListener("keydown", (e) => {
-    const calcVisible = !document.getElementById("calculadora").classList.contains("oculto");
-    if (!calcVisible) return;
-
-    if (!isNaN(e.key)) {
-      expresion += e.key;
-    } else if (["+", "-", "*", "/"].includes(e.key)) {
-      expresion += ` ${e.key} `;
-    } else if (e.key === "Enter") {
-      document.querySelector(".btn-equal").click();
-    } else if (e.key === "Backspace") {
-      expresion = expresion.slice(0, -1);
-    }
-    actualizarPantalla();
-  });
-
+  }
 });

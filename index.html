@@ -3,103 +3,100 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plataforma de Finanzas</title>
+  
+  <link rel="stylesheet" href="estilos.css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <link rel="stylesheet" href="./estilos.css/style.css">
-
-  <script defer src="./js/main.js"></script>
-  <script defer src="./js/historial.js"></script>
-  <script defer src="./js/cotizaciones.js"></script>
-
-  <title>Calculadora Multifuncion</title>
+  <script src="js/bienvenida.js" defer></script>
+  <script src="js/historial.js" defer></script>
+  <script src="js/main.js" defer></script>
 </head>
-<body class="container py-4">
+<body>
+  
+  <header class="navbar">
+    <div class="logo">💰 Calculadora de Finanzas</div>
+    <nav>
+      <ul>
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#herramientas">Herramientas</a></li>
+        <li><a href="#calculadora">Calculadora</a></li>
+        <li><a href="#formulario">Operación</a></li>
+      </ul>
+    </nav>
+  </header>
 
-  <section id="bienvenida" class="card p-4 mx-auto" style="max-width: 400px;">
-    <h2 class="text-center mb-3">Bienvenido a La Calculadora multifuncion</h2>
-    <p id="mensaje" class="text-muted text-center">Ingresa tu nombre para comenzar:</p>
-    <input type="text" id="nombre" class="form-control mb-3" placeholder="Tu nombre">
-    <button id="btn-nombre" class="btn btn-primary w-100">Comenzar</button>
+  <section id="inicio" class="section">
+    <h1>Bienvenido a la Calculadora de Finanzas</h1>
+    <p>Simula operaciones financieras, calcula tasas de interés y convierte tus montos a dólares.</p>
   </section>
 
-  <section id="calculadora" class="oculto card p-4 mx-auto" style="max-width: 400px;">
-    <h1 class="text-center text-secundary mb-4">Calculadora</h1>
+  <section id="herramientas" class="section">
+    <h2>Herramientas disponibles</h2>
+    <ul class="tools-list">
+      <li>Calculadora financiera</li>
+      <li>Conversor de divisas</li>
+      <li>Formulario de operaciones seguras</li>
+    </ul>
+  </section>
 
-    <div id="pantalla" class="pantalla">0</div>
+  <section id="calculadora" class="section">
+    <h2>Calculadora Financiera</h2>
+    <form id="calc-form">
+      <label for="producto">Producto:</label>
+      <select id="producto" required>
+        <option value="">Seleccione</option>
+      </select>
 
-    <div class="calculadora-grid">
-      <button class="btn-calc">7</button>
-      <button class="btn-calc">8</button>
-      <button class="btn-calc">9</button>
-      <button class="btn-op">/</button>
+      <label for="monto">Monto (en pesos):</label>
+      <input type="number" id="monto" min="1" required>
 
-      <button class="btn-calc">4</button>
-      <button class="btn-calc">5</button>
-      <button class="btn-calc">6</button>
-      <button class="btn-op">*</button>
+      <label for="plazo">Plazo (meses):</label>
+      <input type="number" id="plazo" min="1" required>
 
-      <button class="btn-calc">1</button>
-      <button class="btn-calc">2</button>
-      <button class="btn-calc">3</button>
-      <button class="btn-op">-</button>
+      <label>
+        <input type="checkbox" id="convertir"> Convertir a USD
+      </label>
 
-      <button class="btn-calc">0</button>
-      <button class="btn-clear">C</button>
-      <button class="btn-equal">=</button>
-      <button class="btn-op">+</button>
+      <button type="submit">Calcular</button>
+    </form>
+    <div class="chart-container">
+      <canvas id="graficoInteres"></canvas>
     </div>
-
-    <!-- Historial -->
-    <h2 class="mt-4">Historial</h2>
-    <ul id="historial" class="list-group"></ul>
-    <button id="limpiar-historial" class="btn btn-outline-danger mt-3">Limpiar historial</button>
-
-    <!-- Gráfica -->
-    <h2 class="mt-4">Gráfica de resultados</h2>
-    <canvas id="graficoResultados" height="100"></canvas>
   </section>
 
-  <aside id="cotizaciones" class="card p-3" style="width: 200px;">
-    <h4 class="mb-3">💱 Cotizaciones</h4>
-    <p><strong>Dólar:</strong> <span id="usd">Cargando...</span></p>
-    <p><strong>Euro:</strong> <span id="eur">Cargando...</span></p>
-    <p><strong>Peso Argentino (ARS):</strong> <span id="ars">Cargando...</span></p>
-    <button id="actualizar-cotizacion" class="btn btn-sm btn-primary mt-2">Actualizar</button>
-    </aside>
+  <section id="formulario" class="section">
+    <h2>Confirmar Operación</h2>
+    <form id="operation-form" enctype="multipart/form-data">
+      <label for="nombre">Nombre completo:</label>
+      <input type="text" id="nombre" required>
 
-  <!-- Mercados -->
-    <aside id="mercados" class="card p-3" style="width: 400px;">
-     <h4 class="mb-3">📈 Wall Street</h4>
-   
-    <div class="tradingview-widget-container">
-    <div id="tradingview_5d8f6"></div>
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-    <script type="text/javascript">
-      new TradingView.widget({
-        "width": "100%",
-        "height": 400,
-        "symbol": "DJI", 
-        "interval": "D",
-        "timezone": "America/Argentina/Buenos_Aires",
-        "theme": "dark",
-        "style": "1",
-        "locale": "es",
-        "toolbar_bg": "#f1f3f6",
-        "enable_publishing": false,
-        "allow_symbol_change": true,
-        "container_id": "tradingview_5d8f6"
-      });
-    </script>
-  </div>
+      <label for="dni">DNI:</label>
+      <input type="text" id="dni" required>
 
+      <label for="direccion">Dirección:</label>
+      <input type="text" id="direccion" required>
 
+      <label for="sueldo">Monto del sueldo:</label>
+      <input type="number" id="sueldo" min="0" required>
+
+      <label for="contacto">Contacto (email o teléfono):</label>
+      <input type="text" id="contacto" required>
+
+      <label for="ingresos">Prueba de ingresos (PDF, JPG, PNG):</label>
+      <input type="file" id="ingresos" accept=".pdf,.jpg,.png" required>
+
+      <label for="garantia">Garantía:</label>
+      <textarea id="garantia" required></textarea>
+
+      <button type="submit">Enviar</button>
+    </form>
+  </section>
+  <footer>
+    <p>© 2025 Calculadora de Finanzas - Todos los derechos reservados</p>
+  </footer>
 </body>
 </html>

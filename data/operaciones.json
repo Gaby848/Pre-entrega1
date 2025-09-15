@@ -1,6 +1,25 @@
-[
-  { "id": "sumar", "nombre": "Sumar" },
-  { "id": "restar", "nombre": "Restar" },
-  { "id": "multiplicar", "nombre": "Multiplicar" },
-  { "id": "dividir", "nombre": "Dividir" }
-]
+{
+  "tipoCambio": 1000,
+  "productos": {
+    "plazoFijo": {
+      "nombre": "Plazo Fijo",
+      "tasa": 8
+    },
+    "prestamo": {
+      "nombre": "Préstamo Personal",
+      "tasa": 25
+    },
+    "letras": {
+      "nombre": "Letras del Tesoro",
+      "tasa": 12
+    },
+    "hipoteca": {
+      "nombre": "Hipoteca",
+      "tasa": 18
+    },
+    "inversionFondo": {
+      "nombre": "Fondo Común de Inversión",
+      "tasa": 10
+    }
+  }
+}

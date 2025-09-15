@@ -1,86 +1,113 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  font-family: "Segoe UI", sans-serif;
-  background: #2b2b2b;
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  background: #070000;
+  color: #797878;
+}
+
+.navbar {
+  background: #081829;
+  color: #fff;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 20px;
-  padding: 20px;
-}
-
-#cotizaciones {
-  background: #fd9bb2;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(255, 249, 249, 0.201);
-}
-
-#calculadora {
-  background: #fd9bb2;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
-  padding: 20px;
-  width: 320px;
-}
-
-.pantalla {
-  background: #f9f4f4;
-  color: #120101;
-  font-size: 2.5rem;
-  font-weight: 400;
-  padding: 20px;
-  border-radius: 4px;
-  text-align: right;
-  margin-bottom: 15px;
-  height: 80px;
-  display: flex;
+  justify-content: space-between;
   align-items: center;
-  justify-content: flex-end;
-  overflow-x: auto;
+  padding: 15px;
 }
 
-.calculadora-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+.navbar .logo {
+  font-size: 1.4rem;
+  font-weight: bold;
 }
 
-.calculadora-grid button {
-  height: 60px;
-  font-size: 1.2rem;
-  border: none;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: background 0.15s ease-in-out;
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 15px;
 }
 
-.btn-calc {
-  background: #f3f3f3;
-  color: #111;
-}
-.btn-calc:hover {
-  background: #000000;
-}
-
-.btn-op {
-  background: #00060b;
+.navbar ul li a {
   color: white;
-}
-.btn-op:hover {
-  background: #e7eaec;
-}
-
-.btn-equal {
-  background: #000001;
-  color: white;
-}
-.btn-equal:hover {
-  background: #000408;
+  text-decoration: none;
+  transition: 0.3s;
 }
 
-.btn-clear {
-  background: #e60c05;
-  color: white;
+.navbar ul li a:hover {
+  color: #ffcc00;
 }
-.btn-clear:hover {
-  background: #030000;
+
+.section {
+  padding: 40px 20px;
+  max-width: 800px;
+  margin: auto;
+}
+
+.section h2 {
+  margin-bottom: 15px;
+  color: #004080;
+}
+
+.tools-list {
+  list-style: disc;
+  padding-left: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+form label {
+  font-weight: bold;
+}
+
+form input, form select, form textarea, form button {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+form button {
+  background: #004080;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+form button:hover {
+  background: #003060;
+}
+
+#resultado, #form-msg {
+  margin-top: 15px;
+  padding: 10px;
+  background: #e9f5e9;
+  border: 1px solid #b5d6b5;
+  border-radius: 6px;
+}
+
+
+footer {
+  text-align: center;
+  padding: 15px;
+  background: #004080;
+  color: white;
+  margin-top: 20px;
+}
+.chart-container {
+  margin-top: 20px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
